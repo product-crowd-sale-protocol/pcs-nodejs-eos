@@ -1,0 +1,14 @@
+{
+  "name": "cmnty-contract-test",
+  "version": "1.0.0",
+  "description": "for the test of cmnty contract",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "author": "mokemokecore",
+  "license": "ISC",
+  "dependencies": {
+    "eosjs": "^16.0.9"
+  }
+}
