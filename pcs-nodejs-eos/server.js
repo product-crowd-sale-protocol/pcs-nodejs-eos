@@ -5,6 +5,7 @@ const { getSubsigMessage } = require("./pcs-sig");
 
 class PCSServer {
     constructor(new_aws_api, aws_security_api, contract_name) {
+        console.log(new_aws_api, aws_security_api, contract_name);
         this.new_aws_api = new_aws_api;
         this.aws_security_api = aws_security_api;
         this.contract_name = contract_name;
@@ -75,14 +76,24 @@ class PCSServer {
 
     async genSalt(password, symbol, nftId) {
         const seedHash = ecc.sha256(password);
+        console.log(this.new_aws_api);
         const url = this.new_aws_api + `?tokenId=${nftId}&hash=${seedHash}&symbol=${symbol}`;
+        console.log(url);
 
-        const res = await fetch(url, { method: "GET", mode: "cors" });
+        let res;
+        try {
+            res = await fetch(url, { method: "GET", mode: "cors" });
+        } catch (err) {
+            console.error(err);
+        }
+
         if (res.status !== 200) {
+            console.error(res);
             throw new Error(res);
         }
 
         try {
+            console.log(res);
             const data = await res.json();
             const salt = data.body;
             return salt;

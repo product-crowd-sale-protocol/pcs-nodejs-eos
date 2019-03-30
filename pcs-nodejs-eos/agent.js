@@ -70,14 +70,10 @@ class PCSAgent {
             console.log(signed_trx);
 
             /// broadcast signed transaction
-            const res = await this.eosJS.pushTransaction(signed_trx);
-            console.log(res);
+            return this.eosJS.pushTransaction(signed_trx);
         } catch (err) {
-            console.error(err);
-            return false;
+            throw new Error(err);
         }
-
-        return true;
     }
 
     /**
@@ -119,6 +115,7 @@ class PCSAgent {
             signature: sig,
             newSubKey: new_subkey
         };
+        console.log("query: ", query);
 
         try {
             /// via agent to sign action data
@@ -126,14 +123,10 @@ class PCSAgent {
             console.log(signed_trx);
 
             /// broadcast signed transaction
-            const res = await this.eosJS.pushTransaction(signed_trx);
-            console.log(res);
+            return this.eosJS.pushTransaction(signed_trx);
         } catch (err) {
-            console.error(err);
-            return false;
+            throw new Error(err);
         }
-
-        return true;
     }
 }
 

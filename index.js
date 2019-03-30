@@ -39,22 +39,34 @@ const pcsAgent = new PCSAgent(
     NEW_AWS_API_URL,
     AWS_SECURITY_API_URL);
 
-const pcsServer = new PCSServer(EOS_API_URL, AWS_SECURITY_API_URL, CONTRACT_NAME);
+const pcsServer = new PCSServer(NEW_AWS_API_URL, AWS_SECURITY_API_URL, CONTRACT_NAME);
 
 async function getTokenTableSample() {
     const sym = await readStdin("Which token symbol?", DEFAULT_SYMBOL);
 
     console.log("start getTokenTable sample");
-    const row = await eosTable.getTokenTable(sym);
-    console.log(row);
+
+    try {
+        const row = await eosTable.getTokenTable(sym);
+        console.log(row);
+    } catch (err) {
+        console.error(err);
+        console.error("fail to request");
+    }
 }
 
 async function getAvailableTokenIdSample() {
     const sym = await readStdin("Which token symbol?", DEFAULT_SYMBOL);
 
     console.log("start getAvailableTokenId sample");
-    const next_token_id = await eosTable.getAvailableTokenId(sym);
-    console.log(`the next available token ID with '${sym}' symbol is ${next_token_id}`);
+
+    try {
+        const next_token_id = await eosTable.getAvailableTokenId(sym);
+        console.log(`the next available token ID with '${sym}' symbol is ${next_token_id}`);
+    } catch (err) {
+        console.error(err);
+        console.error("fail to request");
+    }
 }
 
 async function getTokenInfoSample() {
@@ -62,33 +74,47 @@ async function getTokenInfoSample() {
     const token_id = await readStdin("Which token ID?", "0");
 
     console.log("start getTokenInfo sample");
-    const row = await eosTable.getTokenInfo(sym, token_id);
-    const status = (row == null)
-        ? "nothing"
-        : `owned by ${row.owner} and ${row.active === 0 ? "locked" : "active"}`;
 
-    console.log(`the '${sym}' symbol token with ID #${token_id} is ${status}`);
+    try {
+        const row = await eosTable.getTokenInfo(sym, token_id);
+        const status = (row == null)
+            ? "nothing"
+            : `owned by ${row.owner} and ${row.active === 0 ? "locked" : "active"}`;
+
+        console.log(`the '${sym}' symbol token with ID #${token_id} is ${status}`);
+    } catch (err) {
+        console.error(err);
+        console.error("fail to request");
+    }
 }
 
 async function verifyAuthSample() {
     const sym = await readStdin("Which token symbol?", DEFAULT_SYMBOL);
     const token_id = await readStdin("Which token ID?", "0");
     const password = await readStdin("what's current password of its token?");
-    const subkey_private = await pcsServer.passwordToKey(sym, token_id, password);
 
     console.log("start verifyAuth sample");
-    const success = await pcsServer.verifyAuth(sym, token_id, subkey_private);
-    console.log(`token ${sym}#${token_id} is ${success ? "verified" : "rejected"}`);
+
+    try {
+        const subkey_private = await pcsServer.passwordToKey(sym, token_id, password);
+        const success = await pcsServer.verifyAuth(sym, token_id, subkey_private);
+        console.log(`token ${sym}#${token_id} is ${success ? "verified" : "rejected"}`);
+    } catch (err) {
+        console.error(err);
+        console.error("fail to request");
+    }
 }
 
 async function createTokenSample() {
     console.log("start createToken sample");
 
     try {
-        const success = await pcsClient.create();
+        const res = await pcsClient.create();
+        console.log(res);
         console.log("succeed in creating token");
     } catch (err) {
-        console.log("fail to create token");
+        console.error(err);
+        console.error("fail to create token");
     }
 }
 
@@ -99,10 +125,12 @@ async function issueTokenSample() {
     console.log("start issueToken sample");
 
     try {
-        const success = await pcsClient.issue(receipent, "1", sym, "issue token");
+        const res = await pcsClient.issue(receipent, "1", sym, "issue token");
+        console.log(res);
         console.log("succeed in issuing token");
     } catch (err) {
-        console.log("fail to issue token");
+        console.error(err);
+        console.error("fail to issue token");
     }
 }
 
@@ -115,10 +143,12 @@ async function issueToAgentSample() {
     try {
         const token_id = await eosTable.getAvailableTokenId(sym);
         const subkey_private = await pcsServer.passwordToKey(sym, token_id, password);
-        const success = await pcsClient.issueToAgent(sym, token_id, subkey_private);
-        console.log("succeed in issuing token");
+        const res = await pcsClient.issueToAgent(sym, token_id, subkey_private);
+        console.log(res);
+        console.log("succeed in issuing token to agent account");
     } catch (err) {
-        console.log("fail to issue token");
+        console.error(err);
+        console.error("fail to issue token to agent account");
     }
 }
 
@@ -131,10 +161,24 @@ async function refreshKeySample() {
 
     try {
         const new_subkey_private = await pcsServer.passwordToKey(sym, token_id, password);
-        const success = await pcsClient.refreshKey(sym, token_id, new_subkey_private);
+        const new_subkey = ecc.privateToPublic(new_subkey_private);
+        console.log("new subkey is", new_subkey);
+
+        const eos_auth = await this.eosTable.getEOSAuth(sym, token_id);
+        const old_subkey = eos_auth.subkey;
+        console.log("old subkey is", old_subkey);
+
+        if (new_subkey === old_subkey) {
+            console.log("recover private key corresponding to given token subkey");
+            return;
+        }
+
+        const res = await pcsClient.refreshKey(sym, token_id, new_subkey_private);
+        console.log(res);
         console.log("succeed in changing subkey of given token");
     } catch (err) {
-        console.log("fail to change subkey of given token");
+        console.error(err);
+        console.error("fail to change subkey of given token");
     }
 }
 
@@ -149,10 +193,12 @@ async function refreshKeyViaAgentSample() {
     try {
         const old_subkey_private = await pcsServer.passwordToKey(sym, token_id, old_password);
         const new_subkey_private = await pcsServer.passwordToKey(sym, token_id, new_password);
-        const success = await pcsAgent.refreshKeyViaAgent(sym, token_id, old_subkey_private, new_subkey_private);
+        const res = await pcsAgent.refreshKeyViaAgent(sym, token_id, old_subkey_private, new_subkey_private);
+        console.log(res);
         console.log("succeed in changing subkey of given token");
     } catch (err) {
-        console.log("fail to change subkey of given token");
+        console.error(err);
+        console.error("fail to change subkey of given token");
     }
 }
 
@@ -164,10 +210,12 @@ async function transferByIdSample() {
     console.log("start transferById sample");
 
     try {
-        const success = await pcsClient.transferById(receipent, sym, token_id, "send token");
+        const res = await pcsClient.transferById(receipent, sym, token_id, "send token");
+        console.log(res);
         console.log("succeed in transfering given token");
     } catch (err) {
-        console.log("fail to transfer given token");
+        console.error(err);
+        console.error("fail to transfer given token");
     }
 }
 
@@ -181,10 +229,12 @@ async function transferByIdFromAgentSample() {
 
     try {
         const subkey_private = await pcsServer.passwordToKey(sym, token_id, password);
-        const success = await pcsAgent.transferByIdFromAgent(receipent, sym, token_id, subkey_private);
+        const res = await pcsAgent.transferByIdFromAgent(receipent, sym, token_id, subkey_private);
+        console.log(res);
         console.log("succeed in transfering given token");
     } catch (err) {
-        console.log("fail to transfer given token");
+        console.error(err);
+        console.error("fail to transfer given token");
     }
 }
 
@@ -197,10 +247,12 @@ async function lockTokenSample() {
 
     try {
         const subkey_private = await pcsServer.passwordToKey(sym, token_id, password);
-        const success = await pcsClient.lock(sym, token_id, subkey_private);
+        const res = await pcsClient.lock(sym, token_id, subkey_private);
+        console.log(res);
         console.log("succeed in locking token");
     } catch (err) {
-        console.log("fail to lock token");
+        console.error(err);
+        console.error("fail to lock token");
     }
 }
 
@@ -214,12 +266,7 @@ async function readStdin(question="please input some words", default_input="") {
 }
 
 async function selectCommand() {
-    let sym;
-    let token_id;
-    let receipent;
-    let password;
     let select = true;
-
     const cid = await readStdin("\nselect command ID:");
     switch (cid) {
         case "0":

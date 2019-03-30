@@ -43,8 +43,7 @@ class PCSClient {
         if (sym) {
             const exists = await this.eosTable.existSymbol(sym);
             if (exists) {
-                console.error(`given symbol '${sym}' has already been used`);
-                return false;
+                throw new Error(`given symbol '${sym}' has already been used`);
             }
         } else {
             let exists = true;
@@ -71,15 +70,7 @@ class PCSClient {
         const actions = [action];
         console.log(actions);
 
-        try {
-            const res = await this.eosJS.transaction({actions});
-            console.log(res);
-        } catch (err) {
-            console.error(err);
-            return false;
-        }
-
-        return true;
+        return this.eosJS.transaction({actions});
     }
 
     /**
@@ -101,15 +92,7 @@ class PCSClient {
         const actions = [action];
         console.log(actions);
 
-        try {
-            const res = await this.eosJS.transaction({actions});
-            console.log(res);
-        } catch (err) {
-            console.error(err);
-            return false;
-        }
-
-        return true;
+        return this.eosJS.transaction({actions});
     }
 
     /**
@@ -119,29 +102,22 @@ class PCSClient {
      * @param {string} memo - Data that can be written as the user likes.
      */
     async issueToAgent(sym, token_id, subkey_private, memo="issue token to agent account") {
+        /// check given private key is valid
+        if (!ecc.isValidPrivate(subkey_private)) {
+            throw new RangeError(`invalid private_key format: ${subkey_private}`);
+        }
+
         const subkey = ecc.privateToPublic(subkey_private);
         const action = {
             account: this.contract_name,
             name: "issuetoagent",
-            authorization: [{
-                actor: this.account.actor,
-                permission: "active"
-            }],
+            authorization: [this.account],
             data: {sym, token_id, subkey, memo}
         };
         const actions = [action];
         console.log(actions);
 
-        try {
-            const res = await this.eosJS.transaction({actions});
-            console.log(res);
-        } catch (err) {
-            console.error(err);
-            return false;
-        }
-
-        console.log("succeed in issuing token to agent account");
-        return true;
+        return this.eosJS.transaction({actions});
     }
 
     /**
@@ -162,38 +138,22 @@ class PCSClient {
         const actions = [action];
         console.log(actions);
 
-        try {
-            const res = await this.eosJS.transaction({actions});
-            console.log(res);
-        } catch (err) {
-            console.error(err);
-            return false;
-        }
-
-        console.log("succeed in transfering given token");
-        return true;
+        return this.eosJS.transaction({actions});
     }
 
     /**
      * Refresh token subsig public key in EOS table and set new subsig private key into local storage.
-     * @param {string} password new password to generate subsig key pair
      * @param {string} sym community symbol
      * @param {string} token_id nft id
+     * @param {string} new_subkey_private private key corresponding to new subkey
      */
-    async refreshKey(sym, token_id, old_subkey, new_subkey_private) {
-        console.log("old subkey is", old_subkey);
-
-        const new_subkey = ecc.privateToPublic(new_subkey_private);
-        console.log("new subkey is", new_subkey);
-
-        const eos_auth = await this.eosTable.getEOSAuth(sym, token_id);
-        const old_subkey = eos_auth.subkey;
-
-        if (new_subkey === old_subkey) {
-            console.log("recover private key corresponding to given token subkey");
-            return true;
+    async refreshKey(sym, token_id, new_subkey_private) {
+        /// check given private key is valid
+        if (!ecc.isValidPrivate(new_subkey_private)) {
+            throw new RangeError(`invalid private_key format: ${new_subkey_private}`);
         }
 
+        const new_subkey = ecc.privateToPublic(new_subkey_private);
         const action = {
             account: this.contract_name,
             name: "refreshkey",
@@ -203,15 +163,7 @@ class PCSClient {
         const actions = [action];
         console.log(actions);
 
-        try {
-            const res = await this.eosJS.transaction({actions});
-            console.log(res);
-        } catch (err) {
-            console.error(err);
-            return false;
-        }
-
-        return true;
+        return this.eosJS.transaction({actions});
     }
 
 
@@ -233,11 +185,8 @@ class PCSClient {
         const ts_bin = getSigTimestamp();
         const message_bin = [...act_bin, ...sym_bin, ...id_bin, ...ts_bin];
         console.log("message_bin:", "[ " + message_bin.join(", ") + " ]");
-        console.log("message_bin size:", message_bin.length);
         const message = Buffer(message_bin);
         const sig = ecc.sign(message, subkey_private);
-        console.log("sig:", sig);
-
         const action = {
             account: this.contract_name,
             name: "lock",
@@ -247,16 +196,7 @@ class PCSClient {
         const actions = [action];
         console.log(actions);
 
-        try {
-            const res = await this.eosJS.transaction({actions});
-            console.log(res);
-        } catch (err) {
-            console.error(err);
-            return false;
-        }
-
-        console.log("succeed in locking token");
-        return true;
+        return this.eosJS.transaction({actions});
     }
 }
 
