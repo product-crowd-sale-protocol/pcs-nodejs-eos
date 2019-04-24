@@ -32,6 +32,7 @@ class PCSServer {
         };
 
         const res = await fetch(url, req);
+
         if (res.status !== 200) {
             throw new Error(res);
         }
@@ -47,13 +48,13 @@ class PCSServer {
     }
 
     async requestSignTransaction(query) {
-        const apiUrl = this.aws_security_api + "/eosagent"
+        const url = this.aws_security_api + "/eosagent"
         const options = {
             method: "POST",
             body: JSON.stringify(query)
         };
 
-        const res = await fetch(apiUrl, options);
+        const res = await fetch(url, options);
         if (res.status !== 200) {
             throw new Error(res);
         }
@@ -62,7 +63,7 @@ class PCSServer {
         console.log(data);
 
         if (data.errorMessage) {
-            console.error(JSON.parse(data.errorMessage));
+            console.error(data.errorMessage);
             throw new Error(`the request to ${url} is failed`);
         }
 
@@ -122,7 +123,23 @@ class PCSServer {
     async verifyAuth(sym, token_id, private_key) {
         const message = getSubsigMessage();
         const sig = ecc.sign(message, private_key);
-        return await this.checkByPCSSecurity(sym, token_id, sig, message);
+        console.log("sig", sig);
+        const url = `http://ec2-18-179-15-1.ap-northeast-1.compute.amazonaws.com:5000/verify?symbol_code=${sym}&token_id=${token_id}&sig=${sig}`;
+        const res = await fetch(url);
+        if (res.status !== 200) {
+            throw new Error(res);
+        }
+
+        try {
+            const data = await res.text();
+            console.log(data);
+            return data === "verified";
+        } catch (err) {
+            console.error(err);
+            return false;
+        }
+
+        // return await this.checkByPCSSecurity(sym, token_id, sig, message);
     }
 }
 

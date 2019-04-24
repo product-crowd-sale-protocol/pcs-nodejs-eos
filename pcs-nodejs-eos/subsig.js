@@ -48,8 +48,8 @@ function getSymbolCodeRaw(symbol_code) {
 function publicKeyToBuffer(public_key) {
     const pk_prefix = "EOS";
     const pk_body = public_key.slice(pk_prefix.length);
-    const raw_pk = Base58.decode(pk_body);
-    return Buffer([0, ...Array.from(raw_pk).slice(0, -4).map(v => +v)]);
+    const raw_pk = Base58.decode(pk_body).slice(0, -4);
+    return Buffer([0, ...raw_pk]);
 }
 
 /// uint64 -> bytearray
@@ -66,11 +66,13 @@ function uint64ToBuffer(num) {
         return Number(remainder);
     });
 
-    return bytearray;
+    return Buffer(bytearray);
 }
 
 /// bytearray -> String
 function bufferToNum(bytearray) {
+    bytearray = Array.from(bytearray);
+
     const a_byte = new BigInteger("256");
     let bn = new BigInteger("0");
     let multiplier = new BigInteger("1");

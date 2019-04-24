@@ -1,23 +1,23 @@
 'use strict'
 
+const ecc = require("eosjs-ecc");
 const readline = require("readline");
 const { PCSAgent,
         PCSClient,
         PCSServer,
         EOSTableAPI } = require("./pcs-nodejs-eos");
-
-const EOS_API_URL = "https://api-kylin.eoslaomao.com:443";
-const EOS_CHAIN_ID = "5fff1dae8dc8e2fc4d5b23b2c7665c97f9e9d8edf2b6485a86ba311c25639191";
-const CONTRACT_NAME = "pcscoreprtcl";
-const AGENT_NAME = "leohioleohio";
-const NEW_AWS_API_URL = "https://85z0ywf1ol.execute-api.ap-northeast-1.amazonaws.com/secretHashing0";
-const AWS_SECURITY_API_URL = "https://78qy7hxmjd.execute-api.ap-northeast-1.amazonaws.com/pcsSecurity";
-
-const private_keys = require("./config/private_keys.json")[0];
-const ACCOUNT_NAME = private_keys.account_name;
-const PERMISSION_NAME = private_keys.permission_name;
-const keyProvider = [private_keys.private_key];
-const DEFAULT_SYMBOL = "XFIZIWO";
+const { EOS_API_URL,
+        EOS_CHAIN_ID,
+        CONTRACT_NAME,
+        AGENT_NAME,
+        NEW_AWS_API_URL,
+        AWS_SECURITY_API_URL,
+        DEFAULT_SYMBOL,
+        DEV_PRIVATE_KEYS } = require("./config/env_variables_kylin.json");
+const dev_private_key = DEV_PRIVATE_KEYS[0];
+const DEV_ACCOUNT_NAME = dev_private_key.account_name;
+const DEV_PERMISSION_NAME = dev_private_key.permission_name;
+const keyProvider = [dev_private_key.private_key];
 
 const eosTable = new EOSTableAPI(EOS_API_URL, CONTRACT_NAME);
 
@@ -26,8 +26,8 @@ const pcsClient = new PCSClient(
     EOS_API_URL,
     EOS_CHAIN_ID,
     CONTRACT_NAME,
-    ACCOUNT_NAME,
-    PERMISSION_NAME,
+    DEV_ACCOUNT_NAME,
+    DEV_PERMISSION_NAME,
     NEW_AWS_API_URL,
     AWS_SECURITY_API_URL);
 
@@ -119,7 +119,7 @@ async function createTokenSample() {
 }
 
 async function issueTokenSample() {
-    const receipent = await readStdin("Who do you issue new token to?", ACCOUNT_NAME);
+    const receipent = await readStdin("Who do you issue new token to?", DEV_ACCOUNT_NAME);
     const sym = await readStdin("Which token symbol?", DEFAULT_SYMBOL);
 
     console.log("start issueToken sample");
@@ -205,7 +205,7 @@ async function refreshKeyViaAgentSample() {
 async function transferByIdSample() {
     const sym = await readStdin("Which token symbol?", DEFAULT_SYMBOL);
     const token_id = await readStdin("Which token ID?", "0");
-    const receipent = await readStdin("Who do you send the token to?", ACCOUNT_NAME);
+    const receipent = await readStdin("Who do you send the token to?", DEV_ACCOUNT_NAME);
 
     console.log("start transferById sample");
 
@@ -222,7 +222,7 @@ async function transferByIdSample() {
 async function transferByIdFromAgentSample() {
     const sym = await readStdin("Which token symbol?", DEFAULT_SYMBOL);
     const token_id = await readStdin("Which token ID?", "0");
-    const receipent = await readStdin("Who do you send the token to?", ACCOUNT_NAME);
+    const receipent = await readStdin("Who do you send the token to?", DEV_ACCOUNT_NAME);
     const password = await readStdin("what's current password of its token?");
 
     console.log("start transferByIdFromAgent sample");

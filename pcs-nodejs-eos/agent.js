@@ -102,7 +102,7 @@ class PCSAgent {
         const ts_bin = getSigTimestamp();
         const message_bin = [...act_bin, ...sym_bin, ...id_bin, ...sk_bin, ...ts_bin];
         const message = Buffer(message_bin);
-        console.log(message);
+        console.log(JSON.stringify([...message]));
 
         /// generate signature for query data
         const sig = ecc.sign(message, old_subkey_private);

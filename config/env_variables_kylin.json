@@ -1,0 +1,16 @@
+{
+    "EOS_API_URL": "https://api-kylin.eoslaomao.com:443",
+    "EOS_CHAIN_ID": "5fff1dae8dc8e2fc4d5b23b2c7665c97f9e9d8edf2b6485a86ba311c25639191",
+    "CONTRACT_NAME": "pcscoreprtcl",
+    "AGENT_NAME": "leohioleohio",
+    "NEW_AWS_API_URL": "https://85z0ywf1ol.execute-api.ap-northeast-1.amazonaws.com/secretHashing0",
+    "AWS_SECURITY_API_URL": "https://78qy7hxmjd.execute-api.ap-northeast-1.amazonaws.com/pcsSecurity",
+    "DEFAULT_SYMBOL": "XFIZIWO",
+    "DEV_PRIVATE_KEYS": [{
+        "chain_id": "5fff1dae8dc8e2fc4d5b23b2c7665c97f9e9d8edf2b6485a86ba311c25639191",
+        "account_name": "pcseveryone2",
+        "permission_name": "test",
+        "private_key": "5KhcoSuV9vCyDY5efv7giGdpEmbyuscWfT9R3tY2dmGy9E7ZotM",
+        "public_key": "EOS52VQ9U7bQnFuLPMiNFMbHSu8bWCUar4e2UJNexFyEMbDmgG7C1"
+    }]
+}
