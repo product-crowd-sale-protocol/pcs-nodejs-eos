@@ -1,5 +1,6 @@
 'use strict'
 
+const URL = require('url').URL;
 const ecc = require('eosjs-ecc');
 const { getSubsigMessage } = require("./pcs-sig");
 
@@ -75,10 +76,10 @@ class PCSServer {
         }
     }
 
-    async genSalt(password, symbol, nftId) {
+    async genSalt(password, symbol, token_id) {
         const seedHash = ecc.sha256(password);
         console.log(this.new_aws_api);
-        const url = this.new_aws_api + `?tokenId=${nftId}&hash=${seedHash}&symbol=${symbol}`;
+        const url = this.new_aws_api + `?tokenId=${token_id}&hash=${seedHash}&symbol=${symbol}`;
         console.log(url);
 
         let res;
@@ -110,8 +111,8 @@ class PCSServer {
      * @param {string} password password
      */
     async passwordToKey(symbol, token_id, password) {
-        const salt = await this.genSalt(String(password), symbol, Number(token_id)); // generate secure salt using our server
-        const private_key = ecc.seedPrivate(`${password}+${salt}`); // e.g. 5K2YUVmWfxbmvsNxCsfvArXdGXm7d5DC9pn4yD75k2UaSYgkXTh
+        const salt = await this.genSalt(password, symbol, token_id); // generate secure salt using our server
+        const private_key = ecc.seedPrivate(password + salt); // e.g. 5K2YUVmWfxbmvsNxCsfvArXdGXm7d5DC9pn4yD75k2UaSYgkXTh
         return private_key;
     }
 
@@ -124,8 +125,30 @@ class PCSServer {
         const message = getSubsigMessage();
         const sig = ecc.sign(message, private_key);
         console.log("sig", sig);
-        const url = `http://ec2-18-179-15-1.ap-northeast-1.compute.amazonaws.com:5000/verify?symbol_code=${sym}&token_id=${token_id}&sig=${sig}`;
-        const res = await fetch(url);
+
+        const url = "https://pcs-api.toycash.io/verify";
+        console.log("url", url);
+
+        const query = {
+            "api_url": "https://api-kylin.eoslaomao.com:443",
+            "contract_name": "pcscoreprtcl",
+            "symbol_code": sym,
+            "token_id": token_id,
+            "sig": sig
+        };
+
+        const headers = new Headers();
+        headers.append("Content-Type", "application/json");
+
+        const req = {
+            method: "POST",
+            mode: "cors",
+            headers: headers,
+            body: JSON.stringify(query)
+        };
+
+        const res = await fetch(url, req);
+        console.log(res);
         if (res.status !== 200) {
             throw new Error(res);
         }

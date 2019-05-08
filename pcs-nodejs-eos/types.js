@@ -864,9 +864,9 @@ Extension.fromBuffer = function () {
 function PublicKey() {
     const pk_type = {
         type: "UnsignedInt",
-        data: Array.from("array<Int(8),33>");
+        data: Array.from("array<Int(8),33>")
     };
-    
+
     return {
 
     };
@@ -1063,7 +1063,7 @@ const trx = {
 
 /// packed trx
 const packed_trx = DataStream.from(trx, trx_type);
-console.log(packed_trx.data);
-console.log(packed_trx.toHex()); /// -> "b983b35caf633991969f000000000100a6823403ea3055000000572d3ccdcd01a02e450a52a9209500000000a8ed323229a02e450a52a92095405da32a52d7a88a102700000000000004454f53000000000873656e6420454f5300"
+// console.log(packed_trx.data);
+// console.log(packed_trx.toHex()); /// -> "b983b35caf633991969f000000000100a6823403ea3055000000572d3ccdcd01a02e450a52a9209500000000a8ed323229a02e450a52a92095405da32a52d7a88a102700000000000004454f53000000000873656e6420454f5300"
 
 module.exports = { DataStream, toBI, toSI, Uint, Int, UnsignedInt, SymbolCode, SymbolType, Asset, Name, PermissionLevel, Action, TimePointSec, StringType, Extension, packActionData, convertByteArray };
