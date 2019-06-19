@@ -98,6 +98,7 @@ class PCSClient {
     /**
      * issue to agent account
      * @param {string} sym token symbol
+     * @param {string} token_id available token ID
      * @param {string} password for generating subkey
      * @param {string} memo - Data that can be written as the user likes.
      */

@@ -13,7 +13,7 @@ const { EOS_API_URL,
         NEW_AWS_API_URL,
         AWS_SECURITY_API_URL,
         DEFAULT_SYMBOL,
-        DEV_PRIVATE_KEYS } = require("./config/env_variables_kylin.json");
+        DEV_PRIVATE_KEYS } = require("./config/env_variables.json");
 const dev_private_key = DEV_PRIVATE_KEYS[0];
 const DEV_ACCOUNT_NAME = dev_private_key.account_name;
 const DEV_PERMISSION_NAME = dev_private_key.permission_name;
@@ -164,7 +164,7 @@ async function refreshKeySample() {
         const new_subkey = ecc.privateToPublic(new_subkey_private);
         console.log("new subkey is", new_subkey);
 
-        const eos_auth = await this.eosTable.getEOSAuth(sym, token_id);
+        const eos_auth = await eosTable.getEOSAuth(sym, token_id);
         const old_subkey = eos_auth.subkey;
         console.log("old subkey is", old_subkey);
 

@@ -85,7 +85,7 @@ class EOSTableAPI {
             const last_token_id = new BigInteger(String(response.rows[0].id));
             return last_token_id.add(new BigInteger("1")).toString();
         } else {
-            return new BigInteger(0);
+            return "0";
         }
     }
 
