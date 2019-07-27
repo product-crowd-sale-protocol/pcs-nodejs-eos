@@ -847,18 +847,17 @@ StringType.fromBuffer = function (buffer, pos=0) {
     return Buffer(data).toString("utf-8");
 };
 
+/// 未完成
 function Extension() {
-    return {
-
-    };
+    return;
 }
 
 Extension.toBuffer = function () {
-
+    return;
 };
 
 Extension.fromBuffer = function () {
-    return "";
+    return　"";
 };
 
 function PublicKey() {

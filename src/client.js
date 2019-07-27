@@ -7,7 +7,8 @@ const PCSServer = require("./server");
 const { getSigTimestamp,
         getNameValue,
         getSymbolCodeRaw,
-        uint64ToBuffer } = require("./subsig");
+        uint64ToBuffer,
+        stringToBuffer } = require("./subsig");
 
 
 class PCSClient {
@@ -170,9 +171,9 @@ class PCSClient {
 
     /**
      * This function is only triggerd internally when transferById's agent argument is true.
-     * @param {*} sym token symbol
-     * @param {*} token_id token ID to chenge subkey
-     * @param {*} subkey_private private key corresponding to the subkey of token to lock
+     * @param {string} sym token symbol
+     * @param {number} token_id token ID to chenge subkey
+     * @param {string} subkey_private private key corresponding to the subkey of token to lock
      */
     async lock(sym, token_id, subkey_private) {
         /// check given private key is valid
@@ -193,6 +194,39 @@ class PCSClient {
             name: "lock",
             authorization: [this.account],
             data: {sym, token_id, sig}
+        };
+        const actions = [action];
+        console.log(actions);
+
+        return this.eosJS.transaction({actions});
+    }
+
+    /**
+     * @param {string} sym token symbol
+     * @param {number} token_id token ID to chenge subkey
+     * @param {string} meta_str written in token meta data
+     * @param {string} subkey_private private key corresponding to the subkey of token to set meta data
+     */
+    async setmeta(sym, token_id, meta_str, subkey_private) {
+        /// check given private key is valid
+        if (!ecc.isValidPrivate(subkey_private)) {
+            throw new RangeError(`invalid private_key format: ${subkey_private}`);
+        }
+
+        const act_bin = getNameValue("setmeta");
+        const sym_bin = getSymbolCodeRaw(sym);
+        const id_bin = uint64ToBuffer(token_id);
+        const meta_bin = stringToBuffer(meta_str);
+        const ts_bin = getSigTimestamp();
+        const message_bin = [...act_bin, ...sym_bin, ...id_bin, ...meta_bin, ...ts_bin];
+        console.log("message_bin:", "[ " + message_bin.join(", ") + " ]");
+        const message = Buffer(message_bin);
+        const sig = ecc.sign(message, subkey_private);
+        const action = {
+            account: this.contract_name,
+            name: "setmeta",
+            authorization: [this.account],
+            data: {sym, token_id, meta_str, sig}
         };
         const actions = [action];
         console.log(actions);

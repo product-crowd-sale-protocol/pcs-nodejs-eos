@@ -6,7 +6,6 @@ const { getSubsigMessage } = require("./pcs-sig");
 
 class PCSServer {
     constructor(new_aws_api, aws_security_api, contract_name) {
-        console.log(new_aws_api, aws_security_api, contract_name);
         this.new_aws_api = new_aws_api;
         this.aws_security_api = aws_security_api;
         this.contract_name = contract_name;

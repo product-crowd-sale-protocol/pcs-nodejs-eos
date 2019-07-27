@@ -3,6 +3,7 @@
 const Eos = require("eosjs");
 const Base58 = require("bs58");
 const BigInteger = require('bigi');
+const { StringType } = require('./types');
 
 /// timestamp -> bytearray
 function getSigTimestamp() {
@@ -83,11 +84,16 @@ function bufferToNum(bytearray) {
     return bn.toString();
 }
 
+function stringToBuffer(str) {
+    return StringType.toBuffer(str);
+}
+
 module.exports = {
     getSigTimestamp,
     getNameValue,
     getSymbolCodeRaw,
     publicKeyToBuffer,
     uint64ToBuffer,
-    bufferToNum
+    bufferToNum,
+    stringToBuffer
 };

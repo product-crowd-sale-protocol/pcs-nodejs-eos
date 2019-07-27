@@ -1,11 +1,19 @@
 'use strict'
 
+const CHAIN_NAME = (process.argv.length > 2 && process.argv[2] === "main") ? "main" : "kylin";
+console.log("execute on the " + CHAIN_NAME + " net.");
+if (CHAIN_NAME === "kylin") {
+    console.log("if you would like to execute on the main net, you use `node index.js main`.");
+} else if (CHAIN_NAME === "main") {
+    console.log("if you would like to execute on the kylin net, you use `node index.js kylin`.");
+}
+
 const ecc = require("eosjs-ecc");
 const readline = require("readline");
 const { PCSAgent,
         PCSClient,
         PCSServer,
-        EOSTableAPI } = require("./pcs-nodejs-eos");
+        EOSTableAPI } = require("./src");
 const { EOS_API_URL,
         EOS_CHAIN_ID,
         CONTRACT_NAME,
@@ -13,7 +21,7 @@ const { EOS_API_URL,
         NEW_AWS_API_URL,
         AWS_SECURITY_API_URL,
         DEFAULT_SYMBOL,
-        DEV_PRIVATE_KEYS } = require("./config/env_variables.json");
+        DEV_PRIVATE_KEYS } = require("./config/env_variables_" + CHAIN_NAME + ".json");
 const dev_private_key = DEV_PRIVATE_KEYS[0];
 const DEV_ACCOUNT_NAME = dev_private_key.account_name;
 const DEV_PERMISSION_NAME = dev_private_key.permission_name;
@@ -256,6 +264,25 @@ async function lockTokenSample() {
     }
 }
 
+async function setTokenMetaDataSample() {
+    const sym = await readStdin("Which token symbol?", DEFAULT_SYMBOL);
+    const token_id = await readStdin("Which token ID?", "0");
+    const password = await readStdin("what's current password of its token?");
+    const meta_str = await readStdin("what's new meta data? (at most 256 bytes)");
+
+    console.log("start lockToken sample");
+
+    try {
+        const subkey_private = await pcsServer.passwordToKey(sym, token_id, password);
+        const res = await pcsClient.setmeta(sym, token_id, meta_str, subkey_private);
+        console.log(res);
+        console.log("succeed in setting token meta data");
+    } catch (err) {
+        console.error(err);
+        console.error("fail to set token meta data");
+    }
+}
+
 async function readStdin(question="please input some words", default_input="") {
     console.log(`${question} (default '${default_input}')`);
     const rl = readline.createInterface(process.stdin, process.stdout);
@@ -272,41 +299,44 @@ async function selectCommand() {
         case "0":
             select = false;
             break;
-        case "1":
+        case "a1":
             await getTokenTableSample();
             break;
-        case "2":
+        case "a2":
             await getAvailableTokenIdSample();
             break;
-        case "3":
+        case "a3":
             await getTokenInfoSample();
             break;
-        case "4":
+        case "a4":
             await verifyAuthSample();
             break;
-        case "10":
+        case "b0":
             await createTokenSample();
             break;
-        case "11":
+        case "b1":
             await issueTokenSample();
             break;
-        case "21":
+        case "c1":
             await issueToAgentSample();
             break;
-        case "12":
+        case "b2":
             await transferByIdSample();
             break;
-        case "13":
+        case "b3":
             await refreshKeySample();
             break;
-        case "14":
+        case "b4":
             await lockTokenSample();
             break;
-        case "22":
+        case "c2":
             await transferByIdFromAgentSample();
             break;
-        case "23":
+        case "c3":
             await refreshKeyViaAgentSample();
+            break;
+        case "c5":
+            await setTokenMetaDataSample();
             break;
         default:
             showCommandList();
@@ -318,20 +348,21 @@ async function selectCommand() {
 
 function showCommandList() {
     console.log("ID | COMMAND NAME\n" +
-                " 1   getTokenTable\n" +
-                " 2   getAvailableTokenId\n" +
-                " 3   getTokenInfo\n" +
-                " 4   verifyAuth\n" +
-                "10   createToken\n" +
-                "11   issueToken\n" +
-                "21   issueToAgent\n" +
-                "12   transferById\n" +
-                "22   transferByIdFromAgent\n" +
-                "13   refreshKey\n" +
-                "23   refreshKeyViaAgent\n" +
-                "14   lockToken\n" +
+                "a1   getTokenTable\n" +
+                "a2   getAvailableTokenId\n" +
+                "a3   getTokenInfo\n" +
+                "a4   verifyAuth\n" +
+                "b0   createToken\n" +
+                "b1   issueToken\n" +
+                "c1   issueToAgent\n" +
+                "b2   transferById\n" +
+                "c2   transferByIdFromAgent\n" +
+                "b3   refreshKey\n" +
+                "c3   refreshKeyViaAgent\n" +
+                "b4   lockToken\n" +
+                "c5   setTokenMetaData\n" +
                 "     see command list\n" +
-                " 0   EXIT");
+                "0    EXIT");
 }
 
 (async function() {
