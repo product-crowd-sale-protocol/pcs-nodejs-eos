@@ -50,7 +50,7 @@ function publicKeyToBuffer(public_key) {
     const pk_prefix = "EOS";
     const pk_body = public_key.slice(pk_prefix.length);
     const raw_pk = Base58.decode(pk_body).slice(0, -4);
-    return Buffer([0, ...raw_pk]);
+    return Buffer.from([0, ...raw_pk]);
 }
 
 /// uint64 -> bytearray
@@ -67,7 +67,7 @@ function uint64ToBuffer(num) {
         return Number(remainder);
     });
 
-    return Buffer(bytearray);
+    return Buffer.from(bytearray);
 }
 
 /// bytearray -> String

@@ -187,7 +187,7 @@ class PCSClient {
         const ts_bin = getSigTimestamp();
         const message_bin = [...act_bin, ...sym_bin, ...id_bin, ...ts_bin];
         console.log("message_bin:", "[ " + message_bin.join(", ") + " ]");
-        const message = Buffer(message_bin);
+        const message = Buffer.from(message_bin);
         const sig = ecc.sign(message, subkey_private);
         const action = {
             account: this.contract_name,
@@ -220,7 +220,7 @@ class PCSClient {
         const ts_bin = getSigTimestamp();
         const message_bin = [...act_bin, ...sym_bin, ...id_bin, ...meta_bin, ...ts_bin];
         console.log("message_bin:", "[ " + message_bin.join(", ") + " ]");
-        const message = Buffer(message_bin);
+        const message = Buffer.from(message_bin);
         const sig = ecc.sign(message, subkey_private);
         const action = {
             account: this.contract_name,

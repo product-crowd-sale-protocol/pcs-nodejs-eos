@@ -49,7 +49,7 @@ class PCSAgent {
         const id_bin = uint64ToBuffer(token_id);
         const ts_bin = getSigTimestamp();
         const message_bin = [...act_bin, ...to_bin, ...sym_bin, ...id_bin, ...ts_bin];
-        const message = Buffer(message_bin);
+        const message = Buffer.from(message_bin);
 
         /// generate signature for action data
         const sig = ecc.sign(message, subkey_private);
@@ -101,7 +101,7 @@ class PCSAgent {
         const sk_bin = publicKeyToBuffer(new_subkey);
         const ts_bin = getSigTimestamp();
         const message_bin = [...act_bin, ...sym_bin, ...id_bin, ...sk_bin, ...ts_bin];
-        const message = Buffer(message_bin);
+        const message = Buffer.from(message_bin);
         console.log(JSON.stringify([...message]));
 
         /// generate signature for query data

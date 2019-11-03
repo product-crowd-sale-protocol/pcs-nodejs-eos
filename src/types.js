@@ -94,7 +94,7 @@ function Uint(bits) {
     };
 
     FixedUint.toBuffer = function (uint) {
-        return Buffer(FixedUint.toByteArray(uint));
+        return Buffer.from(FixedUint.toByteArray(uint));
     };
 
     FixedUint.fromBuffer = function (buffer, pos=0) {
@@ -154,7 +154,7 @@ function Int(bits) {
     };
 
     FixedInt.toBuffer = function (int) {
-        return Buffer(FixedInt.toByteArray(int));
+        return Buffer.from(FixedInt.toByteArray(int));
     };
 
     FixedInt.fromBuffer = function (buffer, pos=0) {
@@ -196,7 +196,7 @@ UnsignedInt.toBuffer = function (num) {
     }
 
     bytearray.push(toSI(v));
-    return Buffer(bytearray);
+    return Buffer.from(bytearray);
 };
 
 UnsignedInt.fromBuffer = function (buffer, pos=0) {
@@ -328,7 +328,7 @@ SymbolCode.toByteArray = function (symbol_code) {
 };
 
 SymbolCode.toBuffer = function (symbol_code) {
-    return Buffer(SymbolCode.toByteArray(symbol_code));
+    return Buffer.from(SymbolCode.toByteArray(symbol_code));
 };
 
 SymbolCode.fromBuffer = function (buffer, pos=0) {
@@ -406,7 +406,7 @@ SymbolType.toByteArray = function (symbol) {
 };
 
 SymbolType.toBuffer = function (asset) {
-    return Buffer(SymbolType.toByteArray(asset));
+    return Buffer.from(SymbolType.toByteArray(asset));
 };
 
 SymbolType.fromBuffer = function (buffer, pos=0) {
@@ -492,7 +492,7 @@ Asset.toByteArray = function (asset) {
 };
 
 Asset.toBuffer = function (asset) {
-    return Buffer(Asset.toByteArray(asset));
+    return Buffer.from(Asset.toByteArray(asset));
 };
 
 Asset.fromBuffer = function (buffer, pos) {
@@ -621,7 +621,7 @@ Name.toByteArray = function (name) {
 };
 
 Name.toBuffer = function (name) {
-    return Buffer(Name.toByteArray(name));
+    return Buffer.from(Name.toByteArray(name));
 };
 
 Name.fromBuffer = function (buffer, pos=0) {
@@ -692,7 +692,7 @@ PermissionLevel.toByteArray = function (permission_level) {
 };
 
 PermissionLevel.toBuffer = function (permission_level) {
-    return Buffer(PermissionLevel.toByteArray(permission_level));
+    return Buffer.from(PermissionLevel.toByteArray(permission_level));
 };
 
 PermissionLevel.fromBuffer = function (buffer, pos) {
@@ -808,7 +808,7 @@ Action.toBuffer = function (action) {
         data: "vector<Int(8)>"
     };
     const ds = DataStream.from(action, action_type);
-    return Buffer(ds.data).slice(0, ds.pos);
+    return Buffer.from(ds.data).slice(0, ds.pos);
 };
 
 Action.fromBuffer = function (buffer, pos=0) {
@@ -837,14 +837,14 @@ function StringType(str) {
 StringType.toBuffer = function (str) {
     const data = Buffer(String(str), "utf-8");
     const size = UnsignedInt.toBuffer(data.length);
-    return Buffer([...Array.from(size), ...Array.from(data)]);
+    return Buffer.from([...Array.from(size), ...Array.from(data)]);
 };
 
 StringType.fromBuffer = function (buffer, pos=0) {
     const ds = new DataStream(buffer, pos);
     const size = toSI(ds.read("UnsignedInt"));
     const data = ds.read(size);
-    return Buffer(data).toString("utf-8");
+    return Buffer.from(data).toString("utf-8");
 };
 
 /// 未完成
@@ -875,7 +875,7 @@ PublicKey.toBuffer = function (public_key) {
     const pk_prefix = "EOS";
     const pk_body = public_key.slice(pk_prefix.length);
     const raw_pk = Base58.decode(pk_body).slice(0, -4);
-    return Buffer([0].concat(Array.from(raw_pk)));
+    return Buffer.from([0].concat(Array.from(raw_pk)));
 };
 
 PublicKey.fromBuffer = function (buffer) {
@@ -1006,7 +1006,7 @@ DataStream.prototype.write = function (value, type) {
 };
 
 DataStream.prototype.toHex = function () {
-    return Buffer(this.data.slice(0, this.pos)).toString("hex");
+    return Buffer.from(this.data.slice(0, this.pos)).toString("hex");
 };
 
 DataStream.from = function (value, type) {
